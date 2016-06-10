@@ -27,8 +27,8 @@ class MBEDemoViewController : UIViewController {
         buildPipeline()
         buildResources()
         startDisplayTimer()
-        
-        let tapRecognizer = UITapGestureRecognizer(target: self, action: Selector("tapGesture"))
+
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(MBEDemoViewController.tapGesture))
         view.addGestureRecognizer(tapRecognizer)
     }
     
@@ -45,7 +45,7 @@ class MBEDemoViewController : UIViewController {
         metalLayer.pixelFormat = .BGRA8Unorm
         view.layer.addSublayer(metalLayer)
 
-        commandQueue = device.newCommandQueue()
+        commandQueue = device!.newCommandQueue()
     }
     
     func buildPipeline() {
@@ -55,7 +55,7 @@ class MBEDemoViewController : UIViewController {
     }
     
     func startDisplayTimer() {
-        timer = CADisplayLink(target: self, selector: Selector("redraw"))
+        timer = CADisplayLink(target: self, selector: #selector(MBEDemoViewController.redraw))
         timer.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
     }
     

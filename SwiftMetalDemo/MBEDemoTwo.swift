@@ -17,9 +17,9 @@ class MBEDemoTwoViewController : MBEDemoViewController {
     var rotationAngle: Float32 = 0
 
     override func buildPipeline() {
-        let library = device.newDefaultLibrary()!
-        let fragmentFunction = library.newFunctionWithName("fragment_demo_two")
-        let vertexFunction = library.newFunctionWithName("vertex_demo_two")
+        let library = device?.newDefaultLibrary()!
+        let fragmentFunction = library?.newFunctionWithName("fragment_demo_two")
+        let vertexFunction = library?.newFunctionWithName("vertex_demo_two")
         
         let vertexDescriptor = MTLVertexDescriptor()
         vertexDescriptor.attributes[0].offset = 0
@@ -44,35 +44,36 @@ class MBEDemoTwoViewController : MBEDemoViewController {
         pipelineDescriptor.colorAttachments[0].pixelFormat = .BGRA8Unorm
         pipelineDescriptor.depthAttachmentPixelFormat = .Depth32Float
         
-        var error: NSErrorPointer = nil
-        pipeline = device.newRenderPipelineStateWithDescriptor(pipelineDescriptor, error:error)
-        if (pipeline == nil) {
-            print("Error occurred when creating pipeline \(error)")
+        do {
+            pipeline = try device?.newRenderPipelineStateWithDescriptor(pipelineDescriptor)
+        }
+        catch {
+            print("Error occurred when creating pipeline \(error)", terminator: "")
         }
         
         let depthStencilDescriptor = MTLDepthStencilDescriptor()
         depthStencilDescriptor.depthCompareFunction = .Less
         depthStencilDescriptor.depthWriteEnabled = true
-        depthStencilState = device.newDepthStencilStateWithDescriptor(depthStencilDescriptor)
+        depthStencilState = device?.newDepthStencilStateWithDescriptor(depthStencilDescriptor)
 
-        commandQueue = device.newCommandQueue()
+        commandQueue = device?.newCommandQueue()
     }
 
     override func buildResources() {
-        (vertexBuffer, indexBuffer) = SphereGenerator.sphereWithRadius(1, stacks: 10, slices: 10, device: device)
+        (vertexBuffer, indexBuffer) = SphereGenerator.sphereWithRadius(1, stacks: 10, slices: 10, device: device!)
 
-        uniformBuffer = device.newBufferWithLength(sizeof(Matrix4x4) * 2, options: .OptionCPUCacheModeDefault)
+        uniformBuffer = device?.newBufferWithLength(sizeof(Matrix4x4) * 2, options: .OptionCPUCacheModeDefault)
     }
     
     override func resize() {
         super.resize()
         
         let layerSize = metalLayer.drawableSize
-        var depthTextureDescriptor = MTLTextureDescriptor.texture2DDescriptorWithPixelFormat(.Depth32Float,
+        let depthTextureDescriptor = MTLTextureDescriptor.texture2DDescriptorWithPixelFormat(.Depth32Float,
             width: Int(layerSize.width),
             height: Int(layerSize.height),
             mipmapped: false)
-        depthTexture = device.newTextureWithDescriptor(depthTextureDescriptor)
+        depthTexture = device?.newTextureWithDescriptor(depthTextureDescriptor)
     }
 
     override func draw() {
@@ -103,7 +104,7 @@ class MBEDemoTwoViewController : MBEDemoViewController {
             passDescriptor.depthAttachment.storeAction = .DontCare
             
             let indexCount = indexBuffer.length / sizeof(UInt16)
-            let commandEncoder = commandBuffer.renderCommandEncoderWithDescriptor(passDescriptor)!
+            let commandEncoder = commandBuffer.renderCommandEncoderWithDescriptor(passDescriptor)
             if userToggle {
                 commandEncoder.setTriangleFillMode(.Lines)
             }

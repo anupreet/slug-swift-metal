@@ -42,7 +42,7 @@ class MBEDemoThreeViewController : MBEDemoViewController {
                                             bitsPerComponent,
                                             bytesPerRow,
                                             colorSpace,
-                                            CGBitmapInfo(options))
+                                            CGBitmapInfo(rawValue: options).rawValue)
 
         CGContextDrawImage(context, CGRectMake(0, 0, CGFloat(width), CGFloat(height)), imageRef)
         
@@ -67,9 +67,9 @@ class MBEDemoThreeViewController : MBEDemoViewController {
     }
 
     override func buildPipeline() {
-        let library = device.newDefaultLibrary()!
-        let vertexFunction = library.newFunctionWithName("vertex_demo_three")
-        let fragmentFunction = library.newFunctionWithName("fragment_demo_three")
+        let library = device?.newDefaultLibrary()!
+        let vertexFunction = library?.newFunctionWithName("vertex_demo_three")
+        let fragmentFunction = library?.newFunctionWithName("fragment_demo_three")
         
         let vertexDescriptor = MTLVertexDescriptor()
         vertexDescriptor.attributes[0].offset = 0
@@ -93,44 +93,45 @@ class MBEDemoThreeViewController : MBEDemoViewController {
         pipelineDescriptor.fragmentFunction = fragmentFunction
         pipelineDescriptor.colorAttachments[0].pixelFormat = .BGRA8Unorm
         pipelineDescriptor.depthAttachmentPixelFormat = .Depth32Float
-        
-        var error: NSErrorPointer = nil
-        pipeline = device.newRenderPipelineStateWithDescriptor(pipelineDescriptor, error:error)
-        if (pipeline == nil) {
-            print("Error occurred when creating pipeline \(error)")
+
+        do {
+            pipeline = try device?.newRenderPipelineStateWithDescriptor(pipelineDescriptor)
+        }
+        catch {
+            print("Error occurred when creating pipeline \(error)", terminator: "")
         }
         
         let depthStencilDescriptor = MTLDepthStencilDescriptor()
         depthStencilDescriptor.depthCompareFunction = .Less
         depthStencilDescriptor.depthWriteEnabled = true
-        depthStencilState = device.newDepthStencilStateWithDescriptor(depthStencilDescriptor)
+        depthStencilState = device?.newDepthStencilStateWithDescriptor(depthStencilDescriptor)
         
-        commandQueue = device.newCommandQueue()
+        commandQueue = device?.newCommandQueue()
         
         let samplerDescriptor = MTLSamplerDescriptor()
         samplerDescriptor.minFilter = .Nearest
         samplerDescriptor.magFilter = .Linear
         
-        samplerState = device.newSamplerStateWithDescriptor(samplerDescriptor)
+        samplerState = device?.newSamplerStateWithDescriptor(samplerDescriptor)
     }
     
     override func buildResources() {
-        (vertexBuffer, indexBuffer) = SphereGenerator.sphereWithRadius(1, stacks: 30, slices: 30, device: device)
+        (vertexBuffer, indexBuffer) = SphereGenerator.sphereWithRadius(1, stacks: 30, slices: 30, device: device!)
         
-        uniformBuffer = device.newBufferWithLength(sizeof(Matrix4x4) * 2, options: .OptionCPUCacheModeDefault)
+        uniformBuffer = device?.newBufferWithLength(sizeof(Matrix4x4) * 2, options: .OptionCPUCacheModeDefault)
         
-        diffuseTexture = self.textureForImage(UIImage(named: "bluemarble")!, device: device)
+        diffuseTexture = self.textureForImage(UIImage(named: "bluemarble")!, device: device!)
     }
     
     override func resize() {
         super.resize()
 
         let layerSize = metalLayer.drawableSize
-        var depthTextureDescriptor = MTLTextureDescriptor.texture2DDescriptorWithPixelFormat(.Depth32Float,
+        let depthTextureDescriptor = MTLTextureDescriptor.texture2DDescriptorWithPixelFormat(.Depth32Float,
                                                                                              width: Int(layerSize.width),
                                                                                              height: Int(layerSize.height),
                                                                                              mipmapped: false)
-            depthTexture = device.newTextureWithDescriptor(depthTextureDescriptor)
+            depthTexture = device?.newTextureWithDescriptor(depthTextureDescriptor)
     }
 
     override func draw() {
@@ -162,7 +163,7 @@ class MBEDemoThreeViewController : MBEDemoViewController {
             passDescriptor.depthAttachment.storeAction = .DontCare
             
             let indexCount = indexBuffer.length / sizeof(UInt16)
-            let commandEncoder = commandBuffer.renderCommandEncoderWithDescriptor(passDescriptor)!
+            let commandEncoder = commandBuffer.renderCommandEncoderWithDescriptor(passDescriptor)
             if userToggle {
                 commandEncoder.setTriangleFillMode(.Lines)
             }

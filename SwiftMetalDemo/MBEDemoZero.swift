@@ -32,7 +32,7 @@ class MBEDemoZeroViewController : MBEDemoViewController {
             
             let commandBuffer = commandQueue.commandBuffer()
             
-            let commandEncoder = commandBuffer.renderCommandEncoderWithDescriptor(passDescriptor)!
+            let commandEncoder = commandBuffer.renderCommandEncoderWithDescriptor(passDescriptor)
 
             commandEncoder.endEncoding()
             

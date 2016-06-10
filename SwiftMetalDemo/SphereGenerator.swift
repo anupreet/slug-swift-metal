@@ -48,10 +48,10 @@ struct SphereGenerator
         {
             for slice in 0..<slices
             {
-                var i0 = UInt16(slice + stack * slices)
-                var i1 = i0 + 1
-                var i2 = i0 + UInt16(slices)
-                var i3 = i2 + 1
+                let i0 = UInt16(slice + stack * slices)
+                let i1 = i0 + 1
+                let i2 = i0 + UInt16(slices)
+                let i3 = i2 + 1
                 
                 indices.append(i0)
                 indices.append(i2)

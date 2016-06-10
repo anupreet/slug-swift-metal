@@ -14,9 +14,9 @@ class MBEDemoOneViewController : MBEDemoViewController {
     var rotationAngle: Float32 = 0.0
 
     override func buildPipeline() {
-        let library = device.newDefaultLibrary()!
-        let vertexFunction = library.newFunctionWithName("vertex_demo_one")
-        let fragmentFunction = library.newFunctionWithName("fragment_demo_one")
+        let library = device?.newDefaultLibrary()!
+        let vertexFunction = library?.newFunctionWithName("vertex_demo_one")
+        let fragmentFunction = library?.newFunctionWithName("fragment_demo_one")
         
         let vertexDescriptor = MTLVertexDescriptor()
         vertexDescriptor.attributes[0].offset = 0
@@ -36,9 +36,13 @@ class MBEDemoOneViewController : MBEDemoViewController {
         pipelineDescriptor.fragmentFunction = fragmentFunction
         pipelineDescriptor.colorAttachments[0].pixelFormat = .BGRA8Unorm
         
-        pipeline = device.newRenderPipelineStateWithDescriptor(pipelineDescriptor, error: nil)
-
-        commandQueue = device.newCommandQueue()
+        do {
+            pipeline = try device?.newRenderPipelineStateWithDescriptor(pipelineDescriptor)
+            commandQueue = device?.newCommandQueue()
+        }
+        catch {
+            print("Error occurred when creating pipeline \(error)", terminator: "")
+        } 
     }
     
     override func buildResources() {
@@ -49,9 +53,9 @@ class MBEDemoOneViewController : MBEDemoViewController {
                                           ColoredVertex(position:Vector4(x:  0.433, y: -0.25, z: 0, w: 1),
                                                         color:ColorRGBA(r: 0, g: 0, b: 1, a: 1))]
 
-        vertexBuffer = device.newBufferWithBytes(vertices, length: sizeof(ColoredVertex) * 3, options:.OptionCPUCacheModeDefault)
+        vertexBuffer = device?.newBufferWithBytes(vertices, length: sizeof(ColoredVertex) * 3, options:.OptionCPUCacheModeDefault)
         
-        uniformBuffer = device.newBufferWithLength(sizeof(Matrix4x4), options:.OptionCPUCacheModeDefault)
+        uniformBuffer = device?.newBufferWithLength(sizeof(Matrix4x4), options:.OptionCPUCacheModeDefault)
     }
 
     // this override of resize shapes the Metal layer into a square and centers it in the containing view
@@ -83,7 +87,7 @@ class MBEDemoOneViewController : MBEDemoViewController {
             
             let commandBuffer = commandQueue.commandBuffer()
 
-            let commandEncoder = commandBuffer.renderCommandEncoderWithDescriptor(passDescriptor)!
+            let commandEncoder = commandBuffer.renderCommandEncoderWithDescriptor(passDescriptor)
             commandEncoder.setRenderPipelineState(pipeline)
             commandEncoder.setFrontFacingWinding(.CounterClockwise)
             commandEncoder.setCullMode(.Back)
